@@ -1,11 +1,14 @@
 package main
 
 import (
-	"github.com/gofiber/fiber/v2"
 	"strings"
 	"regexp"
 	"slices"
-	//	"log"
+	"context"
+	"log"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/jackc/pgx/v5"
 )
 
 type Palindrome struct {
@@ -71,6 +74,16 @@ func main() {
 			return c.Status(fiber.StatusBadRequest).
 				SendString("Not a palindrome")
 		}
+		connection, error := pgx.Connect(context.Background(), "postgresql://indr:indr@localhost:5432/palindr")
+		if error != nil {
+			c.Status(fiber.StatusInternalServerError)
+			return nil
+		}
+		defer connection.Close(context.Background())
+		result, error := connection.Exec(context.Background(),
+			"INSERT INTO norm (norm) VALUES ($1) RETURNING id", norm)
+		log.Println(error)
+		log.Println(result)
 		return c.SendString(norm)
 	})
 
