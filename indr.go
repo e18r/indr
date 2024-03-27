@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"strings"
+	"regexp"
 	//	"log"
 )
 
@@ -38,6 +39,8 @@ func normalize(text string) string {
 	for chr, asciiChr := range(ascii) {
 		text = strings.ReplaceAll(text, chr, asciiChr)
 	}
+	palindromic, _ := regexp.Compile("[^a-z0-9ñçß]")
+	text = palindromic.ReplaceAllString(text, "")
 	return text
 }
 
