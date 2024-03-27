@@ -4,6 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"strings"
 	"regexp"
+	"slices"
 	//	"log"
 )
 
@@ -44,6 +45,13 @@ func normalize(text string) string {
 	return text
 }
 
+func isPalindrome(norm string) bool {
+	chars := strings.Split(norm, "")
+	slices.Reverse(chars)
+	reverse := strings.Join(chars, "")
+	return norm == reverse
+}
+
 func main() {
 
 	app := fiber.New()
@@ -58,7 +66,12 @@ func main() {
 			return c.Status(fiber.StatusBadRequest).
 				SendString("Text param not found in request body")
 		}
-		return c.SendString(normalize(palindrome.Text))
+		norm := normalize(palindrome.Text)
+		if !isPalindrome(norm) {
+			return c.Status(fiber.StatusBadRequest).
+				SendString("Not a palindrome")
+		}
+		return c.SendString(norm)
 	})
 
 	app.Listen(":3000")
