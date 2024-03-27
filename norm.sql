@@ -1,4 +1,4 @@
-create table norm (
-       id integer primary key,
-       norm text unique not null
+CREATE TABLE norm (
+       id serial PRIMARY KEY,
+       norm text UNIQUE NOT NULL
 )
