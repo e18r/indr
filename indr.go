@@ -104,10 +104,7 @@ func main() {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
-		log.Println(c.IP())
-		log.Println(c.IPs())
 		IP := getIP(c.IP(), c.IPs())
-		log.Println(IP)
 		error = connection.QueryRow(context.Background(),
 			"INSERT INTO text (text, origin, norm_id, created, attempts) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 1) ON CONFLICT ON CONSTRAINT text_text_key DO UPDATE SET attempts = text.attempts + 1 RETURNING id", palindrome.Text, IP, id).
 			Scan(&id)
