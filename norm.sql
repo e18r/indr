@@ -4,3 +4,4 @@ CREATE TABLE norm (
        attempts integer NOT NULL
 );
 GRANT SELECT, INSERT, UPDATE ON norm TO indr;
+GRANT SELECT, USAGE, UPDATE ON norm_id_seq TO indr;

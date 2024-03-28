@@ -6,6 +6,7 @@ import (
 	"slices"
 	"context"
 	"log"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
@@ -77,14 +78,20 @@ func main() {
 		connection, error := pgx.Connect(context.Background(), "postgresql://indr:indr@localhost:5432/palindr")
 		if error != nil {
 			c.Status(fiber.StatusInternalServerError)
+			log.Println(error)
 			return nil
 		}
 		defer connection.Close(context.Background())
-		result, error := connection.Exec(context.Background(),
-			"INSERT INTO norm (norm) VALUES ($1) RETURNING id", norm)
-		log.Println(error)
-		log.Println(result)
-		return c.SendString(norm)
+		var id int
+		error = connection.QueryRow(context.Background(),
+			"INSERT INTO norm (norm, attempts) VALUES ($1, 1) RETURNING id", norm).
+			Scan(&id)
+		if error != nil {
+			c.Status(fiber.StatusInternalServerError)
+			log.Println(error)
+			return nil
+		}
+		return c.SendString(strconv.Itoa(id))
 	})
 
 	app.Listen(":3000")
