@@ -100,6 +100,6 @@ func main() {
 		return c.SendString(strconv.Itoa(id))
 	})
 
-	app.Listen(":3000")
+	app.Listen(":" + os.Getenv("PORT"))
 
 }
