@@ -1,1 +1,2 @@
 CREATE DATABASE palindr;
+CREATE ROLE indr LOGIN PASSWORD 'indr';
