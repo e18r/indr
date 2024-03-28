@@ -7,6 +7,7 @@ import (
 	"context"
 	"log"
 	"strconv"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
@@ -75,7 +76,7 @@ func main() {
 			return c.Status(fiber.StatusBadRequest).
 				SendString("Not a palindrome")
 		}
-		connection, error := pgx.Connect(context.Background(), "postgresql://indr:indr@localhost:5432/palindr")
+		connection, error := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
