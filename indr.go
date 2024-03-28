@@ -77,19 +77,17 @@ func main() {
 		}
 		connection, error := pgx.Connect(context.Background(), "postgresql://indr:indr@localhost:5432/palindr")
 		if error != nil {
-			c.Status(fiber.StatusInternalServerError)
 			log.Println(error)
-			return nil
+			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		defer connection.Close(context.Background())
 		var id int
 		error = connection.QueryRow(context.Background(),
-			"INSERT INTO norm (norm, attempts) VALUES ($1, 1) RETURNING id", norm).
+			"INSERT INTO norm (norm, attempts) VALUES ($1, 1) ON CONFLICT ON CONSTRAINT norm_norm_key DO UPDATE SET attempts = norm.attempts + 1 RETURNING id", norm).
 			Scan(&id)
 		if error != nil {
-			c.Status(fiber.StatusInternalServerError)
 			log.Println(error)
-			return nil
+			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		return c.SendString(strconv.Itoa(id))
 	})
