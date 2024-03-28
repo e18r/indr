@@ -89,6 +89,13 @@ func main() {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
+		error = connection.QueryRow(context.Background(),
+			"INSERT INTO text (text, origin, norm_id, created, attempts) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 1) ON CONFLICT ON CONSTRAINT text_text_key DO UPDATE SET attempts = text.attempts + 1 RETURNING id", palindrome.Text, c.IP(), id).
+			Scan(&id)
+		if error != nil {
+			log.Println(error)
+			return c.SendStatus(fiber.StatusInternalServerError)
+		}
 		return c.SendString(strconv.Itoa(id))
 	})
 
