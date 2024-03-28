@@ -7,5 +7,3 @@ CREATE TABLE text (
        attempts integer NOT NULL
 
 );
-GRANT SELECT, INSERT, UPDATE ON text TO indr;
-GRANT SELECT, USAGE, UPDATE ON text_id_seq TO indr;
