@@ -83,7 +83,7 @@ func main() {
 		defer connection.Close(context.Background())
 		var id int
 		error = connection.QueryRow(context.Background(),
-			"INSERT INTO norm (norm, attempts) VALUES ($1, 1) ON CONFLICT ON CONSTRAINT norm_norm_key DO UPDATE SET attempts = norm.attempts + 1 RETURNING id", norm).
+			"INSERT INTO norm (norm, created, attempts) VALUES ($1, CURRENT_TIMESTAMP, 1) ON CONFLICT ON CONSTRAINT norm_norm_key DO UPDATE SET attempts = norm.attempts + 1 RETURNING id", norm).
 			Scan(&id)
 		if error != nil {
 			log.Println(error)
