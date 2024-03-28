@@ -8,6 +8,7 @@ import (
 	"log"
 	"strconv"
 	"os"
+	"net"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
@@ -57,6 +58,19 @@ func isPalindrome(norm string) bool {
 	return norm == reverse
 }
 
+func getIP(IP string, IPs []string) string {
+	if len(IPs) == 0 {
+		return IP
+	} else {
+		for i := 0; i < len(IPs); i++ {
+			if !net.ParseIP(IPs[i]).IsPrivate() {
+				return IPs[i]
+			}
+		}
+		return IP
+	}
+}
+
 func main() {
 
 	app := fiber.New()
@@ -90,15 +104,17 @@ func main() {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
+		log.Println(c.IP())
+		log.Println(c.IPs())
+		IP := getIP(c.IP(), c.IPs())
+		log.Println(IP)
 		error = connection.QueryRow(context.Background(),
-			"INSERT INTO text (text, origin, norm_id, created, attempts) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 1) ON CONFLICT ON CONSTRAINT text_text_key DO UPDATE SET attempts = text.attempts + 1 RETURNING id", palindrome.Text, c.IP(), id).
+			"INSERT INTO text (text, origin, norm_id, created, attempts) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 1) ON CONFLICT ON CONSTRAINT text_text_key DO UPDATE SET attempts = text.attempts + 1 RETURNING id", palindrome.Text, IP, id).
 			Scan(&id)
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
-		log.Println(c.IP())
-		log.Println(c.IPs())
 		return c.SendString(strconv.Itoa(id))
 	})
 
