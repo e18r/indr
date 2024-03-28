@@ -97,6 +97,8 @@ func main() {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
+		log.Println(c.IP())
+		log.Println(c.IPs())
 		return c.SendString(strconv.Itoa(id))
 	})
 
