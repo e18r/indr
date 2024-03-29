@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"os"
 	"net"
+	"encoding/json"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/jackc/pgx/v5"
@@ -123,6 +124,37 @@ func main() {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		return c.SendString(strconv.Itoa(normID))
+	})
+
+	app.Get("/list", func(c *fiber.Ctx) error {
+		conn, err := pgx.Connect(context.Background(),
+			os.Getenv("DATABASE_URL"))
+		if err != nil {
+			log.Println(err)
+			return c.SendStatus(fiber.StatusInternalServerError)
+		}
+		defer conn.Close(context.Background())
+		rows, _ := conn.Query(context.Background(),
+			"SELECT DISTINCT ON (norm_id) norm_id, text FROM text " +
+			"ORDER BY norm_id, created ASC")
+		var ID int
+		var text string
+		list := make([]map[int]string, 0, 50)
+		_, err = pgx.ForEachRow(rows, []any{&ID, &text}, func() error {
+			row := map[int]string{ID: text}
+			list = append(list, row)
+			return nil
+		})
+		if err != nil {
+			log.Println(err)
+			return c.SendStatus(fiber.StatusInternalServerError)
+		}
+		jsonList, err := json.Marshal(list)
+		if (err != nil) {
+			log.Println(err)
+			return c.SendStatus(fiber.StatusInternalServerError)
+		}
+		return c.SendString(string(jsonList))
 	})
 
 	app.Listen(":" + os.Getenv("PORT"))
