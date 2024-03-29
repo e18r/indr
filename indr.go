@@ -90,7 +90,8 @@ func main() {
 			return c.Status(fiber.StatusBadRequest).
 				SendString("Not a palindrome")
 		}
-		conn, error := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+		conn, error := pgx.Connect(context.Background(),
+			os.Getenv("DATABASE_URL"))
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
