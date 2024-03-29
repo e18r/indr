@@ -99,16 +99,24 @@ func main() {
 		defer conn.Close(context.Background())
 		var id int
 		error = conn.QueryRow(context.Background(),
-			"INSERT INTO norm (norm, created, attempts) VALUES ($1, CURRENT_TIMESTAMP, 1) ON CONFLICT ON CONSTRAINT norm_norm_key DO UPDATE SET attempts = norm.attempts + 1 RETURNING id", norm).
-			Scan(&id)
+			"INSERT INTO norm (norm, created, attempts) " +
+				"VALUES ($1, CURRENT_TIMESTAMP, 1) " +
+				"ON CONFLICT ON CONSTRAINT norm_norm_key " +
+				"DO UPDATE SET attempts = norm.attempts + 1 " +
+				"RETURNING id",
+			norm).Scan(&id)
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		IP := getIP(c.IP(), c.IPs())
 		error = conn.QueryRow(context.Background(),
-			"INSERT INTO text (text, origin, norm_id, created, attempts) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 1) ON CONFLICT ON CONSTRAINT text_text_key DO UPDATE SET attempts = text.attempts + 1 RETURNING id", palindrome.Text, IP, id).
-			Scan(&id)
+			"INSERT INTO text (text, origin, norm_id, created, attempts) " +
+				"VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 1) " +
+				"ON CONFLICT ON CONSTRAINT text_text_key " +
+				"DO UPDATE SET attempts = text.attempts + 1 " +
+				"RETURNING id",
+			palindrome.Text, IP, id).Scan(&id)
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
