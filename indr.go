@@ -97,31 +97,32 @@ func main() {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		defer conn.Close(context.Background())
-		var id int
+		var normID int
 		error = conn.QueryRow(context.Background(),
 			"INSERT INTO norm (norm, created, attempts) " +
 				"VALUES ($1, CURRENT_TIMESTAMP, 1) " +
 				"ON CONFLICT ON CONSTRAINT norm_norm_key " +
 				"DO UPDATE SET attempts = norm.attempts + 1 " +
 				"RETURNING id",
-			norm).Scan(&id)
+			norm).Scan(&normID)
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		IP := getIP(c.IP(), c.IPs())
+		var textID int
 		error = conn.QueryRow(context.Background(),
 			"INSERT INTO text (text, origin, norm_id, created, attempts) " +
 				"VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 1) " +
 				"ON CONFLICT ON CONSTRAINT text_text_key " +
 				"DO UPDATE SET attempts = text.attempts + 1 " +
 				"RETURNING id",
-			palindrome.Text, IP, id).Scan(&id)
+			palindrome.Text, IP, normID).Scan(&textID)
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
-		return c.SendString(strconv.Itoa(id))
+		return c.SendString(strconv.Itoa(normID))
 	})
 
 	app.Listen(":" + os.Getenv("PORT"))
