@@ -86,7 +86,7 @@ func main() {
 				SendString("Text param not found in request body")
 		}
 		norm := normalize(palindrome.Text)
-		if !isPalindrome(norm) {
+		if !isPalindrome(norm) || norm == "" {
 			return c.Status(fiber.StatusBadRequest).
 				SendString("Not a palindrome")
 		}
