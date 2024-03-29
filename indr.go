@@ -111,7 +111,7 @@ func main() {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		IP := getIP(c.IP(), c.IPs())
-		var textID int
+		var textID int //not used, remove
 		error = conn.QueryRow(context.Background(),
 			"INSERT INTO text (text, origin, norm_id, created, attempts) " +
 				"VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 1) " +
