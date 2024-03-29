@@ -90,14 +90,14 @@ func main() {
 			return c.Status(fiber.StatusBadRequest).
 				SendString("Not a palindrome")
 		}
-		connection, error := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+		conn, error := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
-		defer connection.Close(context.Background())
+		defer conn.Close(context.Background())
 		var id int
-		error = connection.QueryRow(context.Background(),
+		error = conn.QueryRow(context.Background(),
 			"INSERT INTO norm (norm, created, attempts) VALUES ($1, CURRENT_TIMESTAMP, 1) ON CONFLICT ON CONSTRAINT norm_norm_key DO UPDATE SET attempts = norm.attempts + 1 RETURNING id", norm).
 			Scan(&id)
 		if error != nil {
@@ -105,7 +105,7 @@ func main() {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		IP := getIP(c.IP(), c.IPs())
-		error = connection.QueryRow(context.Background(),
+		error = conn.QueryRow(context.Background(),
 			"INSERT INTO text (text, origin, norm_id, created, attempts) VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 1) ON CONFLICT ON CONSTRAINT text_text_key DO UPDATE SET attempts = text.attempts + 1 RETURNING id", palindrome.Text, IP, id).
 			Scan(&id)
 		if error != nil {
