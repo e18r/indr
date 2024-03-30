@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -75,6 +76,7 @@ func getIP(IP string, IPs []string) string {
 func main() {
 
 	app := fiber.New()
+	app.Use(cors.New())
 
 	app.Post("/publish", func(c *fiber.Ctx) error {
 		palindrome := new(Palindrome)
