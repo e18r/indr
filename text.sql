@@ -4,6 +4,7 @@ CREATE TABLE text (
        origin cidr NOT NULL,
        norm_id integer REFERENCES norm (id),
        created timestamptz NOT NULL,
-       attempts integer NOT NULL
-
+       attempts integer NOT NULL,
+       seen integer NOT NULL,
+       edited integer NOT NULL
 );
