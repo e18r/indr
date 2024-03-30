@@ -141,9 +141,9 @@ func main() {
 			"ORDER BY norm_id, created ASC")
 		var ID int
 		var text string
-		list := make([]map[int]string, 0, 50)
+		list := make([]map[string]string, 0, 50)
 		_, err = pgx.ForEachRow(rows, []any{&ID, &text}, func() error {
-			row := map[int]string{ID: text}
+			row := map[string]string{"id": strconv.Itoa(ID), "text": text}
 			list = append(list, row)
 			return nil
 		})
