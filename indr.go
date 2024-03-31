@@ -139,7 +139,7 @@ func main() {
 		defer conn.Close(context.Background())
 		rows, _ := conn.Query(context.Background(),
 			"SELECT id, text FROM text " +
-			"ORDER BY created ASC")
+			"ORDER BY created DESC")
 		var ID int
 		var text string
 		list := make([]map[string]string, 0, 50)
