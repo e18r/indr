@@ -1,4 +1,10 @@
 {
-  "test": "indr-test-8",
-  "prod": "indr-prod"
+  "gcloud": {
+    "test": "indr-test-8",
+    "prod": "indr-prod"
+  },
+  "heroku": {
+    "test": "indr-test",
+    "prod": "indr-prod"
+  }
 }

@@ -3,5 +3,6 @@
 cd "$(dirname $0)"
 
 ENV=$(cat ./environment)
-PROJECT=$(jq -r .$ENV ./projects.json)
-gcloud --project=$PROJECT app describe | grep defaultHostname | cut -d" " -f2
+GCLOUD_PROJECT=$(jq -r .gcloud.$ENV ./projects.json)
+gcloud --project=$GCLOUD_PROJECT app describe \
+    | grep defaultHostname | cut -d" " -f2
