@@ -17,5 +17,5 @@ else
 fi
 shred -uzn99 ./app.yaml
 URL=$(./url.sh)
-echo $URL > ../pal/indr.url
+printf $URL > ../pal/indr.url
 printf "\nURL: %s\nsaved in ../pal/indr.url\n" $URL
