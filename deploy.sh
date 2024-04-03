@@ -2,6 +2,11 @@
 
 cd "$(dirname $0)"
 
+if [ ! -e ./environment ]; then
+    echo "./environment does not exist"
+    exit 1
+fi
+
 ENV=$(cat ./environment)
 printf "environment: %s\n" $ENV
 GCLOUD_PROJECT=$(jq -r .gcloud.$ENV ./projects.json)
