@@ -9,7 +9,7 @@ fi
 
 ENV=$(cat ./ENV)
 printf "ENV: %s\n" $ENV
-if [ "$ENV" != "test" -o "$ENV" != "prod" ]; then
+if [ "$ENV" != "test" -a "$ENV" != "prod" ]; then
     echo "only deploy to test or prod envs"
     exit 1
 fi
