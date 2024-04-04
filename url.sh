@@ -2,7 +2,7 @@
 
 cd "$(dirname $0)"
 
-ENV=$(cat ./environment)
+ENV=$(cat ./ENV)
 if [ $ENV = "dev" ]; then
     PROTOCOL="http://"
     URL=$(ip addr | grep 192 | tail -n1 | xargs | cut -d" " -f2 | sed "s|/.*||")
@@ -15,4 +15,4 @@ else
     PORT=""
 fi
 
-printf "%s%s%s" $PROTOCOL $URL $PORT
+printf "%s%s%s\n" $PROTOCOL $URL $PORT

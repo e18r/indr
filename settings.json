@@ -1,0 +1,14 @@
+{
+  "prod": {
+    "project": {
+      "gcloud": "indr-prod",
+      "heroku": "indr-prod"
+    }
+  },
+  "test": {
+    "project": {
+      "gcloud": "indr-test-8",
+      "heroku": "indr-test"
+    }
+  }
+}

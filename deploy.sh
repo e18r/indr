@@ -2,15 +2,19 @@
 
 cd "$(dirname $0)"
 
-if [ ! -e ./environment ]; then
-    echo "./environment does not exist"
+if [ ! -e ./ENV ]; then
+    echo "./ENV does not exist"
     exit 1
 fi
 
-ENV=$(cat ./environment)
-printf "environment: %s\n" $ENV
-GCLOUD_PROJECT=$(jq -r .gcloud.$ENV ./projects.json)
-HEROKU_PROJECT=$(jq -r .heroku.$ENV ./projects.json)
+ENV=$(cat ./ENV)
+printf "ENV: %s\n" $ENV
+if [ "$ENV" != "test" -o "$ENV" != "prod" ]; then
+    echo "only deploy to test or prod envs"
+    exit 1
+fi
+GCLOUD_PROJECT=$(jq -r .$ENV.project.gcloud ./settings.json)
+HEROKU_PROJECT=$(jq -r .$ENV.project.heroku ./settings.json)
 echo "obtaining database url..."
 DATABASE_URL="$(heroku pg:credentials:url -a $HEROKU_PROJECT \
                        | tail -n1 | xargs)"
@@ -21,6 +25,3 @@ else
     gcloud --project=$GCLOUD_PROJECT app deploy
 fi
 shred -uzn99 ./app.yaml
-URL=$(./url.sh)
-printf $URL > ../pal/indr.url
-printf "\nURL: %s\nsaved in ../pal/indr.url\n" $URL
