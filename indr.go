@@ -78,6 +78,10 @@ func main() {
 	app := fiber.New()
 	app.Use(cors.New())
 
+	app.Get("/", func(c *fiber.Ctx) error {
+		return nil
+	});
+
 	app.Post("/publish", func(c *fiber.Ctx) error {
 		palindrome := new(Palindrome)
 		error := c.BodyParser(palindrome)
