@@ -137,9 +137,11 @@ func main() {
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		defer conn.Close(context.Background())
+		after := c.QueryInt("after")
 		rows, _ := conn.Query(context.Background(),
 			"SELECT id, text FROM text " +
-			"ORDER BY created ASC")
+				"WHERE id > $1 " +
+				"ORDER BY created ASC", after)
 		var ID int
 		var text string
 		list := make([]map[string]string, 0, 50)
