@@ -159,6 +159,7 @@ func main() {
 			log.Println(err)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
+		c.Set("Content-Type", "application/json")
 		return c.SendString(string(jsonList))
 	})
 
