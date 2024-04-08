@@ -2,7 +2,7 @@
   "prod": {
     "project": {
       "gcloud": "indr-prod",
-      "heroku": "indr-prod"
+      "heroku": "ome-prod"
     }
   },
   "test": {
