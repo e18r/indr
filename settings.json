@@ -8,7 +8,7 @@
   "test": {
     "project": {
       "gcloud": "indr-test-8",
-      "heroku": "indr-test"
+      "heroku": "ome-test"
     }
   }
 }
