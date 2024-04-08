@@ -8,6 +8,6 @@ if [ "$ENV" != "dev" ]; then
    exit 1
 fi
 
-export DATABASE_URL="postgresql://indr:indr@localhost:5432/palindr"
+export DATABASE_URL="postgresql://indr:indr@localhost:5433/palindr"
 export PORT=3000
 go run .
