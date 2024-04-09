@@ -78,6 +78,8 @@ func main() {
 	app := fiber.New()
 	app.Use(cors.New())
 
+	log.SetFlags(0)
+
 	app.Get("/", func(c *fiber.Ctx) error {
 		return nil
 	});
@@ -130,6 +132,7 @@ func main() {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
+		log.Printf("[indr] publish (%s) \"%s\"\n", IP, palindrome.Text)
 		return c.SendString(strconv.Itoa(textID))
 	})
 
