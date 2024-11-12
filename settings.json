@@ -2,13 +2,15 @@
   "prod": {
     "project": {
       "gcloud": "indr-prod",
-      "heroku": "ome-prod"
+      "heroku": "ome-prod",
+      "neon": "prod"
     }
   },
   "test": {
     "project": {
       "gcloud": "indr-test-8",
-      "heroku": "ome-test"
+      "heroku": "ome-test",
+      "neon": "test"
     }
   }
 }
