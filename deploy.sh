@@ -18,7 +18,7 @@ HEROKU_PROJECT=$(jq -r .$ENV.project.heroku ./settings.json)
 NEON_PROJECT=$(jq -r .$ENV.project.neon ./settings.json)
 echo "obtaining database url..."
 if [ "$ENV" = "test" ]; then
-    DATABASE_URL="$(neon connection-string $NEON_PROJECT)"
+    DATABASE_URL="$(neon connection-string --project-id $NEON_PROJECT)"
 else
     DATABASE_URL="$(heroku pg:credentials:url -a $HEROKU_PROJECT \
                            | grep postgres | xargs)"
