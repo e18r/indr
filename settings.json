@@ -3,7 +3,7 @@
     "project": {
       "gcloud": "indr-prod",
       "heroku": "ome-prod",
-      "neon": ""
+      "neon": "lively-unit-40555327"
     }
   },
   "test": {
