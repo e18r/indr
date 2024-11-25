@@ -142,7 +142,12 @@ func main() {
 				SendString("Not a palindrome")
 		}
 		url := os.Getenv("DATABASE_URL")
-		return store(c, url, palindrome, norm)
+		error = store(c, url, palindrome, norm)
+		if error != nil {
+			log.Println(error)
+			return c.SendStatus(fiber.StatusInternalServerError)
+		}
+		return nil
 	})
 
 	app.Get("/list", func(c *fiber.Ctx) error {
