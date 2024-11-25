@@ -75,6 +75,7 @@ func getIP(IP string, IPs []string) string {
 
 func store(
 	c *fiber.Ctx,
+	dbType string,
 	url string,
 	palindrome *Palindrome,
 	norm string,
@@ -111,7 +112,11 @@ func store(
 		log.Println(error)
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	log.Printf("[indr] publish (%s) \"%s\"\n", IP, palindrome.Text)
+	log.Printf("[indr] publish [%s] (%s) \"%s\"\n",
+		dbType,
+		IP,
+		palindrome.Text,
+	)
 	return c.SendString(strconv.Itoa(textID))
 }
 
@@ -142,14 +147,14 @@ func main() {
 				SendString("Not a palindrome")
 		}
 		url := os.Getenv("DATABASE_URL")
-		error = store(c, url, palindrome, norm)
+		error = store(c, "primary", url, palindrome, norm)
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		url2 := os.Getenv("DATABASE_URL_2")
 		if url2 != "" {
-			error = store(c, url2, palindrome, norm)
+			error = store(c, "secondary", url2, palindrome, norm)
 			if error != nil {
 				log.Println(error)
 			}
