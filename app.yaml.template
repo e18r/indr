@@ -2,6 +2,7 @@
 
 env_variables:
         DATABASE_URL: "$DATABASE_URL"
+        DATABASE_URL_2: "$DATABASE_URL_2"
 
 # handlers:
 
