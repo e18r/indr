@@ -147,6 +147,13 @@ func main() {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
+		url2 := os.Getenv("DATABASE_URL_2")
+		if url2 != "" {
+			error = store(c, url2, palindrome, norm)
+			if error != nil {
+				log.Println(error)
+			}
+		}
 		return nil
 	})
 
