@@ -73,32 +73,7 @@ func getIP(IP string, IPs []string) string {
 	}
 }
 
-func main() {
-
-	app := fiber.New()
-	app.Use(cors.New())
-
-	log.SetFlags(0)
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return nil
-	});
-
-	app.Post("/publish", func(c *fiber.Ctx) error {
-		palindrome := new(Palindrome)
-		error := c.BodyParser(palindrome)
-		if error != nil {
-			return c.Status(fiber.StatusBadRequest).SendString(error.Error())
-		}
-		if palindrome.Text == "" {
-			return c.Status(fiber.StatusBadRequest).
-				SendString("Text param not found in request body")
-		}
-		norm := normalize(palindrome.Text)
-		if !isPalindrome(norm) || norm == "" {
-			return c.Status(fiber.StatusBadRequest).
-				SendString("Not a palindrome")
-		}
+func store(c *fiber.Ctx, palindrome *Palindrome, norm string) error {
 		conn, error := pgx.Connect(context.Background(),
 			os.Getenv("DATABASE_URL"))
 		if error != nil {
@@ -134,6 +109,35 @@ func main() {
 		}
 		log.Printf("[indr] publish (%s) \"%s\"\n", IP, palindrome.Text)
 		return c.SendString(strconv.Itoa(textID))
+}
+
+func main() {
+
+	app := fiber.New()
+	app.Use(cors.New())
+
+	log.SetFlags(0)
+
+	app.Get("/", func(c *fiber.Ctx) error {
+		return nil
+	});
+
+	app.Post("/publish", func(c *fiber.Ctx) error {
+		palindrome := new(Palindrome)
+		error := c.BodyParser(palindrome)
+		if error != nil {
+			return c.Status(fiber.StatusBadRequest).SendString(error.Error())
+		}
+		if palindrome.Text == "" {
+			return c.Status(fiber.StatusBadRequest).
+				SendString("Text param not found in request body")
+		}
+		norm := normalize(palindrome.Text)
+		if !isPalindrome(norm) || norm == "" {
+			return c.Status(fiber.StatusBadRequest).
+				SendString("Not a palindrome")
+		}
+		return store(c, palindrome, norm)
 	})
 
 	app.Get("/list", func(c *fiber.Ctx) error {
