@@ -73,42 +73,46 @@ func getIP(IP string, IPs []string) string {
 	}
 }
 
-func store(c *fiber.Ctx, palindrome *Palindrome, norm string) error {
-		conn, error := pgx.Connect(context.Background(),
-			os.Getenv("DATABASE_URL"))
-		if error != nil {
-			log.Println(error)
-			return c.SendStatus(fiber.StatusInternalServerError)
-		}
-		defer conn.Close(context.Background())
-		var normID int
-		error = conn.QueryRow(context.Background(),
-			"INSERT INTO norm (norm, attempts) " +
-				"VALUES ($1, 0) " +
-				"ON CONFLICT ON CONSTRAINT norm_norm_key " +
-				"DO UPDATE SET attempts = norm.attempts + 1 " +
-				"RETURNING id",
-			norm).Scan(&normID)
-		if error != nil {
-			log.Println(error)
-			return c.SendStatus(fiber.StatusInternalServerError)
-		}
-		IP := getIP(c.IP(), c.IPs())
-		var textID int
-		error = conn.QueryRow(context.Background(),
-			"INSERT INTO text (" +
-				"text, origin, norm_id, created, attempts, seen, edited" +
-				") VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 0, 0, 0) " +
-				"ON CONFLICT ON CONSTRAINT text_text_key " +
-				"DO UPDATE SET attempts = text.attempts + 1 " +
-				"RETURNING id",
-			palindrome.Text, IP, normID).Scan(&textID)
-		if error != nil {
-			log.Println(error)
-			return c.SendStatus(fiber.StatusInternalServerError)
-		}
-		log.Printf("[indr] publish (%s) \"%s\"\n", IP, palindrome.Text)
-		return c.SendString(strconv.Itoa(textID))
+func store(
+	c *fiber.Ctx,
+	url string,
+	palindrome *Palindrome,
+	norm string,
+) error {
+	conn, error := pgx.Connect(context.Background(), url)
+	if error != nil {
+		log.Println(error)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	defer conn.Close(context.Background())
+	var normID int
+	error = conn.QueryRow(context.Background(),
+		"INSERT INTO norm (norm, attempts) " +
+			"VALUES ($1, 0) " +
+			"ON CONFLICT ON CONSTRAINT norm_norm_key " +
+			"DO UPDATE SET attempts = norm.attempts + 1 " +
+			"RETURNING id",
+		norm).Scan(&normID)
+	if error != nil {
+		log.Println(error)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	IP := getIP(c.IP(), c.IPs())
+	var textID int
+	error = conn.QueryRow(context.Background(),
+		"INSERT INTO text (" +
+			"text, origin, norm_id, created, attempts, seen, edited" +
+			") VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 0, 0, 0) " +
+			"ON CONFLICT ON CONSTRAINT text_text_key " +
+			"DO UPDATE SET attempts = text.attempts + 1 " +
+			"RETURNING id",
+		palindrome.Text, IP, normID).Scan(&textID)
+	if error != nil {
+		log.Println(error)
+		return c.SendStatus(fiber.StatusInternalServerError)
+	}
+	log.Printf("[indr] publish (%s) \"%s\"\n", IP, palindrome.Text)
+	return c.SendString(strconv.Itoa(textID))
 }
 
 func main() {
@@ -137,7 +141,8 @@ func main() {
 			return c.Status(fiber.StatusBadRequest).
 				SendString("Not a palindrome")
 		}
-		return store(c, palindrome, norm)
+		url := os.Getenv("DATABASE_URL")
+		return store(c, url, palindrome, norm)
 	})
 
 	app.Get("/list", func(c *fiber.Ctx) error {
