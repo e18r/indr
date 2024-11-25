@@ -123,11 +123,12 @@ func store(
 func storeAsync(
 	c *fiber.Ctx,
 	dbType string,
-	url string,
 	palindrome *Palindrome,
 	norm string,
 	IP string,
 ) {
+	url := os.Getenv("DATABASE_URL_2")
+	if url == "" { return }
 	conn, error := pgx.Connect(context.Background(), url)
 	if error != nil {
 		log.Println(error)
@@ -194,16 +195,17 @@ func main() {
 				SendString("Not a palindrome")
 		}
 		url := os.Getenv("DATABASE_URL")
+		if url == "" {
+			log.Println("env var DATABASE_URL is empty")
+			return c.SendStatus(fiber.StatusInternalServerError)
+		}
 		IP := getIP(c.IP(), c.IPs())
 		error = store(c, "primary", url, palindrome, norm, IP)
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
-		url2 := os.Getenv("DATABASE_URL_2")
-		if url2 != "" {
-			go storeAsync(c, "secondary", url2, palindrome, norm, IP)
-		}
+		go storeAsync(c, "secondary", palindrome, norm, IP)
 		return nil
 	})
 
