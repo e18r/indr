@@ -79,6 +79,7 @@ func store(
 	url string,
 	palindrome *Palindrome,
 	norm string,
+	IP string,
 ) error {
 	conn, error := pgx.Connect(context.Background(), url)
 	if error != nil {
@@ -98,7 +99,6 @@ func store(
 		log.Println(error)
 		return c.SendStatus(fiber.StatusInternalServerError)
 	}
-	IP := getIP(c.IP(), c.IPs())
 	var textID int
 	error = conn.QueryRow(context.Background(),
 		"INSERT INTO text (" +
@@ -118,6 +118,53 @@ func store(
 		palindrome.Text,
 	)
 	return c.SendString(strconv.Itoa(textID))
+}
+
+func storeAsync(
+	c *fiber.Ctx,
+	dbType string,
+	url string,
+	palindrome *Palindrome,
+	norm string,
+	IP string,
+) {
+	conn, error := pgx.Connect(context.Background(), url)
+	if error != nil {
+		log.Println(error)
+		return
+	}
+	defer conn.Close(context.Background())
+	var normID int
+	error = conn.QueryRow(context.Background(),
+		"INSERT INTO norm (norm, attempts) " +
+			"VALUES ($1, 0) " +
+			"ON CONFLICT ON CONSTRAINT norm_norm_key " +
+			"DO UPDATE SET attempts = norm.attempts + 1 " +
+			"RETURNING id",
+		norm).Scan(&normID)
+	if error != nil {
+		log.Println(error)
+		return
+	}
+	var textID int
+	error = conn.QueryRow(context.Background(),
+		"INSERT INTO text (" +
+			"text, origin, norm_id, created, attempts, seen, edited" +
+			") VALUES ($1, $2, $3, CURRENT_TIMESTAMP, 0, 0, 0) " +
+			"ON CONFLICT ON CONSTRAINT text_text_key " +
+			"DO UPDATE SET attempts = text.attempts + 1 " +
+			"RETURNING id",
+		palindrome.Text, IP, normID).Scan(&textID)
+	if error != nil {
+		log.Println(error)
+		return
+	}
+	log.Printf("[indr] publish [%s] (%s) \"%s\"\n",
+		dbType,
+		IP,
+		palindrome.Text,
+	)
+	return
 }
 
 func main() {
@@ -147,17 +194,15 @@ func main() {
 				SendString("Not a palindrome")
 		}
 		url := os.Getenv("DATABASE_URL")
-		error = store(c, "primary", url, palindrome, norm)
+		IP := getIP(c.IP(), c.IPs())
+		error = store(c, "primary", url, palindrome, norm, IP)
 		if error != nil {
 			log.Println(error)
 			return c.SendStatus(fiber.StatusInternalServerError)
 		}
 		url2 := os.Getenv("DATABASE_URL_2")
 		if url2 != "" {
-			error = store(c, "secondary", url2, palindrome, norm)
-			if error != nil {
-				log.Println(error)
-			}
+			go storeAsync(c, "secondary", url2, palindrome, norm, IP)
 		}
 		return nil
 	})
