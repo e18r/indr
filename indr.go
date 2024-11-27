@@ -43,6 +43,13 @@ var ascii = map[string]string{
   "ü": "u",
 }
 
+func dumpEnv() {
+	censor, _ := regexp.Compile("=.*")
+	for _, envVar := range os.Environ() {
+		log.Println(censor.ReplaceAllString(envVar, ""))
+	}
+}
+
 func normalize(text string) string {
 	text = strings.ToLower(text)
 	for chr, asciiChr := range(ascii) {
@@ -174,6 +181,7 @@ func main() {
 	app.Use(cors.New())
 
 	log.SetFlags(0)
+	dumpEnv()
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return nil
