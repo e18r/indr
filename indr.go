@@ -44,9 +44,11 @@ var ascii = map[string]string{
 }
 
 func dumpEnv() {
-	censor, _ := regexp.Compile("=.*")
 	for _, envVar := range os.Environ() {
-		log.Println(censor.ReplaceAllString(envVar, ""))
+		components := strings.Split(envVar, "=")
+		if len(components[1]) > 0 {
+			log.Println(components[0])
+		}
 	}
 }
 
